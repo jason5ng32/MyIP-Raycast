@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-// Get the flag emoji for a given country code
+// Get the flag emoji for a given countryCode
 function countryCodeToFlagEmoji(countryCode: string): string {
   return countryCode.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 }
