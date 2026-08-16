@@ -2,6 +2,7 @@ import {
   Cache,
   Clipboard,
   Icon,
+  Keyboard,
   LaunchType,
   MenuBarExtra,
   environment,
@@ -85,7 +86,7 @@ export default function Command() {
         <MenuBarExtra.Item
           icon={Icon.ArrowClockwise}
           title="Refresh"
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={async () => {
             refreshRequested = true;
             // Awaited so the process stays alive until the fetch lands and re-renders.

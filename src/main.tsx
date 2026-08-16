@@ -8,6 +8,15 @@ import { countryCodeToFlagEmoji, countryName, fetchGeo } from "./lib/geo";
 import { GeoMap, IPEntry, SourceFailure } from "./lib/types";
 import { isUsablePublicIP } from "./lib/valid-ip";
 
+/**
+ * ⌘⇧C is off limits — that is Keyboard.Shortcut.Common.Copy, already taken by "Copy IP" in
+ * the same panel — so copy-all gets the next mnemonic over ("A" for all).
+ */
+const COPY_ALL_SHORTCUT: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd", "shift"], key: "a" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+};
+
 export default function Command() {
   const {
     data,
@@ -185,11 +194,7 @@ function FailureListItem({
           {/* No shortcut: ⌘, is reserved by Raycast for its own preferences action. */}
           <Action title="Configure Sources" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.CopyToClipboard title="Copy Error Message" content={`${failure.source}: ${failure.message}`} />
-          <Action.CopyToClipboard
-            title="Copy All IPs"
-            content={allIPs}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy All IPs" content={allIPs} shortcut={COPY_ALL_SHORTCUT} />
         </ActionPanel>
       }
     />
@@ -211,13 +216,9 @@ function SharedActionItems({ allIPs, onRefresh }: { allIPs: string; onRefresh: (
         title="Query IP"
         icon={Icon.MagnifyingGlass}
         target={<QueryIPView />}
-        shortcut={{ modifiers: ["cmd"], key: "f" }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
       />
-      <Action.CopyToClipboard
-        title="Copy All IPs"
-        content={allIPs}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      />
+      <Action.CopyToClipboard title="Copy All IPs" content={allIPs} shortcut={COPY_ALL_SHORTCUT} />
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
