@@ -58,7 +58,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={data?.error && !data.ip ? Icon.WifiDisabled : Icon.Globe}
-      title={menuBarTitle(data, flag, preferences.labelStyle)}
+      title={menuBarTitle(data, flag, preferences)}
       tooltip="Your external IP"
       isLoading={isLoading}
     >
@@ -187,20 +187,39 @@ function writeLast(result: CheckResult): void {
   store.set(`last:${result.sourceId}`, JSON.stringify(result));
 }
 
-const TITLE_STYLES: Record<LabelStyle, (data: CheckResult, flag: string) => string | undefined> = {
-  flagAndIp: (data, flag) => [flag, data.ip].filter(Boolean).join(" "),
-  flag: (_data, flag) => flag || undefined,
-  ip: (data) => data.ip,
+const TITLE_STYLES: Record<LabelStyle, (ip: string, flag: string) => string | undefined> = {
+  flagAndIp: (ip, flag) => [flag, ip].filter(Boolean).join(" "),
+  flag: (_ip, flag) => flag || undefined,
+  ip: (ip) => ip,
   hidden: () => undefined,
 };
 
-function menuBarTitle(data: CheckResult | undefined, flag: string, style: LabelStyle): string | undefined {
+function menuBarTitle(
+  data: CheckResult | undefined,
+  flag: string,
+  preferences: Preferences.Menubar,
+): string | undefined {
   if (!data?.ip) return undefined;
+
+  // Only the bar label is shortened — the menu item and the copy action keep the full
+  // address, since the label is a glance and the menu is where the real value lives.
+  const ip = preferences.compactIPv6 ? shortenIPv6(data.ip) : data.ip;
 
   // Looked up rather than switched on, so an unrecognized setting degrades to the bare IP
   // instead of silently rendering the default style.
-  const render = TITLE_STYLES[style];
-  return render ? render(data, flag) : data.ip;
+  const render = TITLE_STYLES[preferences.labelStyle];
+  return render ? render(ip, flag) : ip;
+}
+
+/** "2408:8207:246d:e0:…" → "2408:8207:…". IPv4 and unusual v6 forms pass through as is. */
+function shortenIPv6(ip: string): string {
+  if (!ip.includes(":")) return ip;
+
+  const groups = ip.split(":");
+  // Global unicast always has two leading hextets; anything else (e.g. "::1") stays full.
+  if (!groups[0] || !groups[1]) return ip;
+
+  return `${groups[0]}:${groups[1]}:…`;
 }
 
 function formatTime(timestamp: number): string {
