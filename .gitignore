@@ -11,5 +11,4 @@ compiled_raycast_swift
 
 # misc
 .DS_Store
-package-lock.json
 raycast-env.d.ts
